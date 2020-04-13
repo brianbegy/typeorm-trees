@@ -1,19 +1,13 @@
-import { getConnection, createConnection, Connection } from "typeorm";
-import Person from "./entities/person";
-import { default as connOpts } from "./ormconfig";
+import { getConnection, createConnection } from "typeorm";
 import { v1 } from "uuid";
 
-async function getBobsMpath(connection: Connection, id: string) {
-  const qr = await connection
-    .createQueryRunner()
-    .query("SELECT mpath FROM person where id = $1", [id]);
-  console.log(qr);
-  return qr[0]["mpath"];
-}
+import Person from "./entities/person";
+import { getEmployeeMPath, mPathChanged } from "./helpers";
 
 async function proveIt() {
-  await createConnection(connOpts as any);
+  await createConnection();
   const connection = await getConnection("default");
+
   const manager = new Person();
   manager.fullName = "Alice Example";
   manager.title = "Customer Service Manager";
@@ -27,10 +21,13 @@ async function proveIt() {
 
   await connection.manager.save(manager);
   await connection.manager.save(employee);
+  console.log("");
+  console.log("");
+
   console.log(`Bob should have a manager of Alice.`);
 
   console.log(`her id is ${manager.id}`);
-  const oldMpath = await getBobsMpath(connection, employee.id);
+  const oldMpath = await getEmployeeMPath(connection, employee.id);
   console.log(`Bob's mpath is ${oldMpath}.`);
 
   const tree = await connection.getTreeRepository(Person);
@@ -38,56 +35,60 @@ async function proveIt() {
     .getRepository(Person)
     .findOneOrFail({ id: employee.id });
 
-  console.log(
-    `Bob's managers: ${JSON.stringify(await tree.findAncestors(bobFromDB))}`
-  );
+  const originalManager = (await tree.findAncestors(bobFromDB))[0];
+  console.log(`Bob's manager is: ${originalManager.fullName}`);
 
+  console.log("");
+  console.log("");
+  console.log("");
+  console.log("Getting Bob a new manager of Cathy Sampla");
   let newManager = new Person();
   newManager.id = v1();
   newManager.fullName = "Cathy Sampla";
   newManager.title = "Customer Success Manager";
+
+  console.log("saving Cathy so we can attach her to Bob.");
+  console.log("");
+  console.log("");
   newManager = await connection.manager.save(newManager, { reload: true });
 
-  console.log("We're GONNA CHANGE BOB's MANAGER!!!");
-
-  console.log(
-    `GONNA CHANGE ${bobFromDB.fullName}'s manager to ${newManager.fullName}.`
-  );
-
+  console.log(`Changing Bob's manager to ${newManager.fullName}.`);
   bobFromDB.manager = newManager;
+
+  console.log("");
+  console.log("");
+  console.log("saving Bob");
+  console.log("");
   await connection.manager.save(bobFromDB);
+  console.log("");
   console.log("saved");
 
-  let newMpath = await getBobsMpath(connection, employee.id);
-
-  console.log(`Bob's old mpath:`);
-  console.log(oldMpath);
-
-  console.log(`Bob's new mpath:`);
-  console.log(newMpath);
-
-  if (oldMpath == newMpath) {
-    console.log("yup.  Kind of a problem, no?");
+  console.log("");
+  console.log("");
+  if (await mPathChanged(connection, employee.id, oldMpath)) {
+    console.log("SUCCESS!!!");
+    return;
   }
+  console.log("Mpath failed to update by saving the new employee record.");
 
   newManager.reports = [];
   newManager.reports.push(bobFromDB);
+  console.log("");
+  console.log("");
   console.log("saving the new manager");
- 
+
   await connection.manager.save(newManager);
-  newMpath = await getBobsMpath(connection, employee.id);
 
-  console.log(`Bob's old mpath:`);
-  console.log(oldMpath);
-
-  console.log(`Bob's new mpath:`);
-  console.log(newMpath);
-
-  if (oldMpath == newMpath) {
-    console.log("yup.  Kind of a problem, no?");
+  console.log("");
+  console.log("");
+  console.log("");
+  console.log("");
+  if (await mPathChanged(connection, employee.id, oldMpath)) {
+    console.log("SUCCESS!!!");
+    return;
   }
-
-
+  console.log("Mpath failed to update by saving the new manager record.");
+  console.log("complete.");
 }
 
 proveIt();

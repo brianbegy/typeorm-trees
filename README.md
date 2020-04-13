@@ -11,9 +11,7 @@ updating the child.parent doesn't work.
 updating the parent.child doesn't work.
 
 
-##
- 
-Replication.
+## Replication
 
 verify the settings in `ormconfig.js` will work (the app needs create schema permissions but will take care of creating the schema)
 
@@ -25,4 +23,6 @@ run the following console commands:
 then 
 
 `ts-node index.ts`  will create some people, assign them managers and print out information on how thier `mpaths` either change or don't change.
+
+
 
