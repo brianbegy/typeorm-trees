@@ -1,0 +1,27 @@
+{
+    "include": ["**/*.ts"],
+    "exclude": ["node_modules", "packages/webpack/dist"],
+    "compilerOptions": {
+      "typeRoots": ["types/**/*.d.ts"],
+      "allowJs": true,
+      "baseUrl": ".",
+      "emitDecoratorMetadata": true,
+      "esModuleInterop": true,
+      "experimentalDecorators": true,
+      "jsx": "react",
+      "lib": ["dom", "es2017", "es2018", "es6", "es5"],
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "noEmit": true,
+      "noUnusedLocals": true,
+      "paths": { "*": ["types/*"] },
+      "skipLibCheck": true,
+      "sourceMap": true,
+      "strict": true,
+      "strictPropertyInitialization": false,
+      "target": "es2018"
+    },
+    "types": ["jest", "@types/jest"],
+    "typeRoots": ["./types", "./node_modules/@types"]
+  }
+  

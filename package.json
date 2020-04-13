@@ -1,0 +1,35 @@
+{
+  "name": "typeorm-trees",
+  "version": "1.0.0",
+  "description": "repo for replicating an issue I am having with typeorm",
+  "main": "index.js",
+  "repository": "git@github.com:brianbegy/typeorm-trees.git",
+  "author": "Brian Begy <brian.begy@kazoohr.com>",
+  "license": "MIT",
+  "scripts": {
+    "typeorm": "ts-node -T ./node_modules/.bin/typeorm --config=ormconfig.js",
+    "db:create": "yarn typeorm query 'create schema if not exists typeorm_test' ",
+    "db:generate": "yarn typeorm migration:generate -n",
+    "db:migrate": "yarn typeorm migration:run",
+    "db:drop": "yarn typeorm schema:drop",
+    "db:nuke": "yes | rm -f ./migrations/* && yarn db:drop && yarn db:create && yarn db:generate InitialTables && yarn db:migrate",
+    "seed": "ts-node -T ./node_modules/typeorm-seeding/dist/cli.js seed --config=ormconfig.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "pg": "^7.12.1",
+    "typeorm": "^0.2.24",
+    "typescript": "^3.8.3",   
+    "@types/jest": "^25.2.1",
+    "jest": "^25.2.0",
+    "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.4",
+    "@babel/plugin-proposal-decorators": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/uuid": "^7.0.2"
+  }
+}
